@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "my-project"
 version = "0.1.0"
-description = "Product and Category management system"
-authors = ["Your Name <your.email@example.com>"]
+description = "OOP"
+authors = ["DMB00 <qwesa372@gmail.com>"]
 packages = [{include = "src", from = "."}]
 
 [tool.poetry.dependencies]

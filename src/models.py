@@ -29,14 +29,24 @@ class Category:
     product_count = 0
 
     def __init__(self, name: str, description: str, products: list):
-        """
-        Инициализация категории.
+        self.name = name
+        self.description = description
+        self.products = products
 
-        Args:
-            name (str): Название категории
-            description (str): Описание категории
-            products (list): Список товаров категории
-        """
+        Category.category_count += 1
+        Category.product_count += len(self.products)
+
+
+class Category:
+    """
+    Класс для представления категории товаров.
+    """
+
+    # Атрибуты класса
+    category_count = 0
+    product_count = 0
+
+    def __init__(self, name: str, description: str, products: list):
         self.name = name
         self.description = description
         self.products = products
