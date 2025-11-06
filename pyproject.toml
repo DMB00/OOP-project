@@ -1,16 +1,26 @@
-[project]
-name = "oop"
+[tool.poetry]
+name = "my-project"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "Egor(DMB)",email = "qwesa372@gmail.com"}
-]
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-]
+description = "OOP"
+authors = ["DMB00 <qwesa372@gmail.com>"]
+packages = [{include = "src", from = "."}]
 
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+black = "^23.0.0"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
