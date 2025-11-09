@@ -55,7 +55,7 @@ class Category:
     Класс для представления категории товаров.
     """
 
-    # Атрибуты класса (сохраняем старую функциональность)
+    # Атрибуты класса
     category_count = 0
     product_count = 0
 
@@ -72,7 +72,6 @@ class Category:
         self.description = description
         self.__products = products  # Приватный атрибут списка товаров
 
-        # Сохраняем старую логику подсчета
         Category.category_count += 1
         Category.product_count += len(self.__products)
 
@@ -84,19 +83,22 @@ class Category:
             product (Product): Объект товара для добавления
         """
         self.__products.append(product)
-        Category.product_count += 1  # Увеличиваем счетчик продуктов
+        Category.product_count += 1
 
     @property
     def products(self):
-        """Геттер для списка товаров в формате строк."""
-        products_list = []
+        """Геттер для списка товаров в формате одной строки."""
+        products_str = ""
         for product in self.__products:
-            products_list.append(
-                f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
-            )
-        return products_list
+            products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
+        return products_str.rstrip()  # Убираем последний перенос строки
 
-    # Сохраняем старые свойства для обратной совместимости
+    # Добавляем свойство для обратной совместимости со старой функциональностью
+    @property
+    def products_list(self):
+        """Свойство для обратной совместимости - возвращает список товаров."""
+        return self.__products
+
     @property
     def current_category_count(self):
         """Текущее количество категорий."""
@@ -106,3 +108,8 @@ class Category:
     def current_product_count(self):
         """Текущее количество товаров."""
         return Category.product_count
+
+    # Для обратной совместимости со старой функциональностью
+    def __len__(self):
+        """Возвращает количество товаров в категории (для обратной совместимости)."""
+        return len(self.__products)
