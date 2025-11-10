@@ -1,17 +1,14 @@
 from src.models import Product, Category
 
-
-def main():
+if __name__ == "__main__":
     # Сброс счетчиков
     Category.category_count = 0
     Category.product_count = 0
 
-    # Создание продуктов (старая функциональность)
     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
     product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
 
-    print("Информация о продуктах:")
     print(product1.name)
     print(product1.description)
     print(product1.price)
@@ -27,66 +24,52 @@ def main():
     print(product3.price)
     print(product3.quantity)
 
-    # Создание категории смартфоны (старая функциональность)
     category1 = Category("Смартфоны",
                          "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
                          [product1, product2, product3])
 
     print(category1.name == "Смартфоны")
     print(category1.description)
-    print(len(category1.products_list))  # Используем products_list для обратной совместимости
-    print(category1.current_category_count)
-    print(category1.current_product_count)
+    print(len(category1.products_list))
+    print(category1.category_count)
+    print(category1.product_count)
 
-    # Новая функциональность - геттер products (одна строка)
-    print("\nТовары в категории Смартфоны:")
+    # Демонстрация новой функциональности - строковое представление
+    print("\nСтроковое представление продуктов:")
+    print(product1)
+    print(product2)
+    print(product3)
+
+    print("\nСтроковое представление категории:")
+    print(category1)
+
+    print("\nСложение продуктов (общая стоимость):")
+    total_cost = product1 + product2
+    print(f"Сумма стоимости {product1.name} и {product2.name}: {total_cost} руб.")
+
+    print("\nТовары в категории (через геттер):")
     print(category1.products)
 
-    # Новая функциональность - создание товара через класс-метод
-    product_data = {
-        'name': 'Google Pixel 8',
-        'description': '128GB, Черный',
-        'price': 150000.0,
-        'quantity': 3
-    }
-    product4 = Product.new_product(product_data)
+    print("\nИтерация по товарам категории:")
+    for product in category1:
+        print(product)
 
-    # Новая функциональность - добавление через метод add_product
-    category1.add_product(product4)
-
-    # Демонстрация обновленного списка товаров
-    print("\nТовары в категории Смартфоны после добавления:")
-    print(category1.products)
-
-    # Новая функциональность - работа с ценой
-    print(f"\nИзменение цены {product1.name}:")
-    print(f"Текущая цена: {product1.price} руб.")
-
-    # Попытка установить невалидную цену
-    product1.price = -100
-
-    # Корректное изменение цены
-    product1.price = 190000.0
-    print(f"Новая цена: {product1.price} руб.")
-
-    # Создание второй категории (старая функциональность)
-    product5 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
+    product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
     category2 = Category("Телевизоры",
                          "Современный телевизор, который позволяет наслаждаться просмотром, станет вашим другом и помощником",
-                         [product5])
+                         [product4])
 
-    print(f"\n{category2.name}")
+    print(category2.name)
     print(category2.description)
-    print(len(category2.products_list))  # Используем products_list для обратной совместимости
-
-    # Новая функциональность - геттер products для телевизоров
-    print("Товары в категории Телевизоры:")
+    print(len(category2.products_list))
     print(category2.products)
 
-    print(f"\nОбщая статистика:")
-    print(f"Всего категорий: {Category.category_count}")
-    print(f"Всего товаров: {Category.product_count}")
+    print(Category.category_count)
+    print(Category.product_count)
 
-
-if __name__ == "__main__":
-    main()
+    # Демонстрация для второй категории
+    print("\nВторая категория:")
+    print(category2)
+    print("Товары во второй категории:")
+    for product in category2:
+        print(product)

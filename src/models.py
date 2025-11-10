@@ -15,8 +15,27 @@ class Product:
         """
         self.name = name
         self.description = description
-        self.__price = price  # Приватный атрибут цены
+        self.__price = price
         self.quantity = quantity
+
+    def __str__(self):
+        """Строковое представление продукта."""
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        """
+        Сложение продуктов - возвращает общую стоимость всех товаров на складе.
+
+        Args:
+            other (Product): Другой продукт для сложения
+
+        Returns:
+            float: Общая стоимость товаров на складе
+        """
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только продукты с продуктами")
+
+        return (self.price * self.quantity) + (other.price * other.quantity)
 
     @property
     def price(self):
@@ -55,7 +74,6 @@ class Category:
     Класс для представления категории товаров.
     """
 
-    # Атрибуты класса
     category_count = 0
     product_count = 0
 
@@ -70,10 +88,15 @@ class Category:
         """
         self.name = name
         self.description = description
-        self.__products = products  # Приватный атрибут списка товаров
+        self.__products = products
 
         Category.category_count += 1
         Category.product_count += len(self.__products)
+
+    def __str__(self):
+        """Строковое представление категории."""
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
 
     def add_product(self, product):
         """
@@ -88,12 +111,9 @@ class Category:
     @property
     def products(self):
         """Геттер для списка товаров в формате одной строки."""
-        products_str = ""
-        for product in self.__products:
-            products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
-        return products_str.rstrip()  # Убираем последний перенос строки
+        products_str = "\n".join(str(product) for product in self.__products)
+        return products_str
 
-    # Добавляем свойство для обратной совместимости со старой функциональностью
     @property
     def products_list(self):
         """Свойство для обратной совместимости - возвращает список товаров."""
@@ -109,7 +129,47 @@ class Category:
         """Текущее количество товаров."""
         return Category.product_count
 
-    # Для обратной совместимости со старой функциональностью
     def __len__(self):
-        """Возвращает количество товаров в категории (для обратной совместимости)."""
+        """Возвращает количество товаров в категории."""
         return len(self.__products)
+
+    def __iter__(self):
+        """Возвращает итератор для перебора товаров категории."""
+        return CategoryIterator(self.__products)
+
+
+class CategoryIterator:
+    """
+    Вспомогательный класс для итерации по товарам категории.
+    """
+
+    def __init__(self, products: list):
+        """
+        Инициализация итератора.
+
+        Args:
+            products (list): Список товаров категории
+        """
+        self.products = products
+        self.index = 0
+
+    def __iter__(self):
+        """Возвращает сам объект как итератор."""
+        return self
+
+    def __next__(self):
+        """
+        Возвращает следующий товар в категории.
+
+        Returns:
+            Product: Следующий товар
+
+        Raises:
+            StopIteration: Когда товары закончились
+        """
+        if self.index < len(self.products):
+            product = self.products[self.index]
+            self.index += 1
+            return product
+        else:
+            raise StopIteration

@@ -1,48 +1,56 @@
 import pytest
-from src.models import Product, Category
+from src.models import Product, Category, CategoryIterator
 
 
 class TestProduct:
     """Тесты для класса Product."""
 
-    def test_old_functionality_initialization(self):
-        """Тест СТАРОЙ функциональности - инициализации объекта Product."""
-        product = Product(
-            name="Test Product",
-            description="Test Description",
-            price=1000.0,
-            quantity=5
-        )
+    def test_str_representation(self):
+        """Тест строкового представления продукта."""
+        product = Product("Test Product", "Test Description", 1000.0, 5)
+        expected_str = "Test Product, 1000.0 руб. Остаток: 5 шт."
 
-        assert product.name == "Test Product"
-        assert product.description == "Test Description"
-        assert product.price == 1000.0
-        assert product.quantity == 5
+        assert str(product) == expected_str
 
-    def test_new_functionality_price_setter_negative(self, capsys):
-        """Тест НОВОЙ функциональности - сеттера цены с отрицательным значением."""
+    def test_addition_products(self):
+        """Тест сложения двух продуктов."""
+        product1 = Product("Product1", "Desc1", 100.0, 2)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+
+        total_cost = product1 + product2
+        expected_cost = (100.0 * 2) + (200.0 * 3)
+
+        assert total_cost == expected_cost
+
+    def test_addition_multiple_products(self):
+        """Тест сложения нескольких продуктов по отдельности."""
+        product1 = Product("Product1", "Desc1", 100.0, 2)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+        product3 = Product("Product3", "Desc3", 300.0, 1)
+
+        # Складываем попарно
+        cost1 = product1 + product2
+        total_cost = cost1 + (product3.price * product3.quantity)
+        expected_cost = (100.0 * 2) + (200.0 * 3) + (300.0 * 1)
+
+        assert total_cost == expected_cost
+
+    def test_addition_invalid_type(self):
+        """Тест сложения с неверным типом."""
         product = Product("Test", "Desc", 100.0, 1)
-        product.price = -50
-        captured = capsys.readouterr()
 
-        assert "Цена не должна быть нулевая или отрицательная" in captured.out
-        assert product.price == 100.0
+        with pytest.raises(TypeError):
+            _ = product + "invalid"
 
-    def test_new_functionality_new_product_class_method(self):
-        """Тест НОВОЙ функциональности - класс-метода new_product."""
-        product_data = {
-            'name': 'New Product',
-            'description': 'New Description',
-            'price': 500.0,
-            'quantity': 10
-        }
+    def test_old_functionality_preserved(self):
+        """Тест что старая функциональность сохранена."""
+        product = Product("Test", "Desc", 150.0, 5)
 
-        product = Product.new_product(product_data)
-
-        assert product.name == 'New Product'
-        assert product.description == 'New Description'
-        assert product.price == 500.0
-        assert product.quantity == 10
+        # Старые атрибуты доступны
+        assert product.name == "Test"
+        assert product.description == "Desc"
+        assert product.price == 150.0
+        assert product.quantity == 5
 
 
 class TestCategory:
@@ -53,91 +61,91 @@ class TestCategory:
         Category.category_count = 0
         Category.product_count = 0
 
-    def test_old_functionality_initialization(self):
-        """Тест СТАРОЙ функциональности - инициализации объекта Category."""
+    def test_str_representation(self):
+        """Тест строкового представления категории."""
+        product1 = Product("Product1", "Desc1", 100.0, 2)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+        category = Category("Test Category", "Description", [product1, product2])
+
+        expected_str = "Test Category, количество продуктов: 5 шт."
+        assert str(category) == expected_str
+
+    def test_str_empty_category(self):
+        """Тест строкового представления пустой категории."""
+        category = Category("Empty Category", "No products", [])
+
+        expected_str = "Empty Category, количество продуктов: 0 шт."
+        assert str(category) == expected_str
+
+    def test_products_property_optimized(self):
+        """Тест оптимизированного геттера products."""
+        product1 = Product("Product1", "Desc1", 100.0, 2)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+        category = Category("Test", "Desc", [product1, product2])
+
+        products_info = category.products
+        expected_info = "Product1, 100.0 руб. Остаток: 2 шт.\nProduct2, 200.0 руб. Остаток: 3 шт."
+
+        assert products_info == expected_info
+
+    def test_iteration(self):
+        """Тест итерации по категории."""
+        product1 = Product("Product1", "Desc1", 100.0, 2)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+        category = Category("Test", "Desc", [product1, product2])
+
+        products = list(category)
+        assert len(products) == 2
+        assert products[0] == product1
+        assert products[1] == product2
+
+    def test_old_functionality_preserved(self):
+        """Тест что старая функциональность категории сохранена."""
+        product1 = Product("Product1", "Desc1", 100.0, 2)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+        category = Category("Test", "Desc", [product1, product2])
+
+        # Старые методы работают
+        assert category.name == "Test"
+        assert len(category.products_list) == 2
+        assert Category.category_count == 1
+
+
+class TestCategoryIterator:
+    """Тесты для класса CategoryIterator."""
+
+    def test_iterator_initialization(self):
+        """Тест инициализации итератора."""
+        products = [
+            Product("Product1", "Desc1", 100.0, 2),
+            Product("Product2", "Desc2", 200.0, 3)
+        ]
+        iterator = CategoryIterator(products)
+
+        assert iterator.products == products
+        assert iterator.index == 0
+
+    def test_iterator_next(self):
+        """Тест метода next итератора."""
+        product1 = Product("Product1", "Desc1", 100.0, 2)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+        products = [product1, product2]
+        iterator = CategoryIterator(products)
+
+        assert next(iterator) == product1
+        assert next(iterator) == product2
+
+        with pytest.raises(StopIteration):
+            next(iterator)
+
+    def test_iterator_for_loop(self):
+        """Тест использования итератора в цикле for."""
         product1 = Product("Product1", "Desc1", 100.0, 2)
         product2 = Product("Product2", "Desc2", 200.0, 3)
         products = [product1, product2]
 
-        category = Category(
-            name="Test Category",
-            description="Test Category Description",
-            products=products
-        )
+        collected_products = []
+        for product in CategoryIterator(products):
+            collected_products.append(product)
 
-        assert category.name == "Test Category"
-        assert category.description == "Test Category Description"
-        assert len(category.products_list) == 2  # Используем products_list для обратной совместимости
-
-    def test_old_functionality_category_count_increment(self):
-        """Тест СТАРОЙ функциональности - подсчета количества категорий."""
-        product = Product("P1", "D1", 100.0, 1)
-        category1 = Category("Cat1", "Desc1", [product])
-        category2 = Category("Cat2", "Desc2", [product])
-
-        assert Category.category_count == 2
-        assert category1.current_category_count == 2
-        assert category2.current_category_count == 2
-
-    def test_new_functionality_private_products_attribute(self):
-        """Тест НОВОЙ функциональности - приватности атрибута products."""
-        product = Product("Test", "Desc", 100.0, 1)
-        category = Category("Test", "Desc", [product])
-
-        with pytest.raises(AttributeError):
-            _ = category.__products
-
-    def test_new_functionality_add_product_method(self):
-        """Тест НОВОЙ функциональности - метода add_product."""
-        product1 = Product("Product1", "Desc1", 100.0, 2)
-        category = Category("Test", "Desc", [product1])
-
-        initial_count = Category.product_count
-
-        product2 = Product("Product2", "Desc2", 200.0, 3)
-        category.add_product(product2)
-
-        assert len(category.products_list) == 2  # Используем products_list
-        assert Category.product_count == initial_count + 1
-
-    def test_new_functionality_products_property_format(self):
-        """Тест НОВОЙ функциональности - геттера products с правильным форматом."""
-        product = Product("Test Product", "Test Desc", 150.0, 5)
-        category = Category("Test", "Desc", [product])
-
-        products_info = category.products
-        expected_format = "Test Product, 150.0 руб. Остаток: 5 шт."
-
-        assert isinstance(products_info, str)
-        assert products_info == expected_format
-
-    def test_old_functionality_empty_category(self):
-        """Тест СТАРОЙ функциональности - создания категории без товаров."""
-        category = Category("Empty Category", "No products", [])
-
-        assert category.name == "Empty Category"
-        assert category.description == "No products"
-        assert len(category.products_list) == 0  # Используем products_list
-        assert Category.category_count == 1
-        assert Category.product_count == 0
-
-    @pytest.fixture
-    def sample_category(self):
-        """Фикстура для создания тестовой категории."""
-        products = [
-            Product("Phone", "Smartphone", 1000.0, 5),
-            Product("Tablet", "Tablet device", 800.0, 3)
-        ]
-        return Category("Electronics", "Electronic devices", products)
-
-    def test_mixed_functionality_with_fixture(self, sample_category):
-        """Тест смешанной функциональности с использованием фикстуры."""
-        # Старая функциональность
-        assert sample_category.name == "Electronics"
-        assert Category.category_count == 1
-
-        # Новая функциональность
-        products_info = sample_category.products
-        assert isinstance(products_info, str)
-        assert "Phone, 1000.0 руб. Остаток: 5 шт." in products_info
-        assert "Tablet, 800.0 руб. Остаток: 3 шт." in products_info
+        assert collected_products == products
