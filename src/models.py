@@ -1,17 +1,15 @@
 class Product:
-    """
-    Базовый класс для представления товара.
-    """
+    """Базовый класс для представления товара."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
         """
         Инициализация товара.
 
         Args:
-            name (str): Название товара
-            description (str): Описание товара
-            price (float): Цена товара
-            quantity (int): Количество товара в наличии
+            name: Название товара
+            description: Описание товара
+            price: Цена товара
+            quantity: Количество товара в наличии
         """
         self.name = name
         self.description = description
@@ -24,10 +22,7 @@ class Product:
 
     def __add__(self, other):
         """
-        Сложение продуктов - возвращает общую стоимость всех товаров на складе.
-
-        Args:
-            other (Product): Другой продукт для сложения
+        Сложение продуктов.
 
         Returns:
             float: Общая стоимость товаров на складе
@@ -56,7 +51,7 @@ class Product:
         Класс-метод для создания нового товара.
 
         Args:
-            product_data (dict): Словарь с данными товара
+            product_data: Словарь с данными товара
 
         Returns:
             Product: Созданный объект товара
@@ -70,10 +65,7 @@ class Product:
 
 
 class Smartphone(Product):
-    """
-    Класс для представления смартфона.
-    Наследуется от класса Product.
-    """
+    """Класс для представления смартфона."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int,
                  efficiency: float, model: str, memory: int, color: str):
@@ -81,14 +73,14 @@ class Smartphone(Product):
         Инициализация смартфона.
 
         Args:
-            name (str): Название смартфона
-            description (str): Описание смартфона
-            price (float): Цена смартфона
-            quantity (int): Количество на складе
-            efficiency (float): Производительность
-            model (str): Модель смартфона
-            memory (int): Объем встроенной памяти (ГБ)
-            color (str): Цвет смартфона
+            name: Название смартфона
+            description: Описание смартфона
+            price: Цена смартфона
+            quantity: Количество на складе
+            efficiency: Производительность
+            model: Модель смартфона
+            memory: Объем встроенной памяти (ГБ)
+            color: Цвет смартфона
         """
         super().__init__(name, description, price, quantity)
         self.efficiency = efficiency
@@ -98,15 +90,13 @@ class Smartphone(Product):
 
     def __str__(self):
         """Строковое представление смартфона."""
-        return (f"{self.name} ({self.model}), {self.price} руб. Остаток: {self.quantity} шт. "
-                f"Память: {self.memory}ГБ, Цвет: {self.color}")
+        return (f"{self.name} ({self.model}), {self.price} руб. "
+                f"Остаток: {self.quantity} шт. Память: {self.memory}ГБ, "
+                f"Цвет: {self.color}")
 
 
 class LawnGrass(Product):
-    """
-    Класс для представления травы газонной.
-    Наследуется от класса Product.
-    """
+    """Класс для представления травы газонной."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int,
                  country: str, germination_period: int, color: str):
@@ -114,13 +104,13 @@ class LawnGrass(Product):
         Инициализация травы газонной.
 
         Args:
-            name (str): Название травы
-            description (str): Описание травы
-            price (float): Цена травы
-            quantity (int): Количество на складе
-            country (str): Страна-производитель
-            germination_period (int): Срок прорастания (дни)
-            color (str): Цвет травы
+            name: Название травы
+            description: Описание травы
+            price: Цена травы
+            quantity: Количество на складе
+            country: Страна-производитель
+            germination_period: Срок прорастания (дни)
+            color: Цвет травы
         """
         super().__init__(name, description, price, quantity)
         self.country = country
@@ -130,13 +120,12 @@ class LawnGrass(Product):
     def __str__(self):
         """Строковое представление травы газонной."""
         return (f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
-                f"Страна: {self.country}, Прорастание: {self.germination_period} дней")
+                f"Страна: {self.country}, "
+                f"Прорастание: {self.germination_period} дней")
 
 
 class Category:
-    """
-    Класс для представления категории товаров.
-    """
+    """Класс для представления категории товаров."""
 
     category_count = 0
     product_count = 0
@@ -146,9 +135,9 @@ class Category:
         Инициализация категории.
 
         Args:
-            name (str): Название категории
-            description (str): Описание категории
-            products (list): Список товаров категории
+            name: Название категории
+            description: Описание категории
+            products: Список товаров категории
         """
         self.name = name
         self.description = description
@@ -170,10 +159,11 @@ class Category:
             product: Объект товара для добавления
 
         Raises:
-            TypeError: Если переданный объект не является продуктом или его наследником
+            TypeError: Если объект не является продуктом
         """
         if not isinstance(product, Product):
-            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+            raise TypeError("Можно добавлять только объекты класса Product "
+                          "или его наследников")
 
         self.__products.append(product)
         Category.product_count += 1
@@ -186,7 +176,7 @@ class Category:
 
     @property
     def products_list(self):
-        """Свойство для обратной совместимости - возвращает список товаров."""
+        """Свойство для обратной совместимости."""
         return self.__products
 
     @property
@@ -209,16 +199,14 @@ class Category:
 
 
 class CategoryIterator:
-    """
-    Вспомогательный класс для итерации по товарам категории.
-    """
+    """Вспомогательный класс для итерации по товарам категории."""
 
     def __init__(self, products: list):
         """
         Инициализация итератора.
 
         Args:
-            products (list): Список товаров категории
+            products: Список товаров категории
         """
         self.products = products
         self.index = 0
