@@ -1,6 +1,6 @@
 class Product:
     """
-    Класс для представления товара.
+    Базовый класс для представления товара.
     """
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
@@ -32,8 +32,8 @@ class Product:
         Returns:
             float: Общая стоимость товаров на складе
         """
-        if not isinstance(other, Product):
-            raise TypeError("Можно складывать только продукты с продуктами")
+        if type(self) != type(other):
+            raise TypeError("Нельзя складывать товары разных типов")
 
         return (self.price * self.quantity) + (other.price * other.quantity)
 
@@ -67,6 +67,70 @@ class Product:
         quantity = product_data.get('quantity')
 
         return cls(name, description, price, quantity)
+
+
+class Smartphone(Product):
+    """
+    Класс для представления смартфона.
+    Наследуется от класса Product.
+    """
+
+    def __init__(self, name: str, description: str, price: float, quantity: int,
+                 efficiency: float, model: str, memory: int, color: str):
+        """
+        Инициализация смартфона.
+
+        Args:
+            name (str): Название смартфона
+            description (str): Описание смартфона
+            price (float): Цена смартфона
+            quantity (int): Количество на складе
+            efficiency (float): Производительность
+            model (str): Модель смартфона
+            memory (int): Объем встроенной памяти (ГБ)
+            color (str): Цвет смартфона
+        """
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self):
+        """Строковое представление смартфона."""
+        return (f"{self.name} ({self.model}), {self.price} руб. Остаток: {self.quantity} шт. "
+                f"Память: {self.memory}ГБ, Цвет: {self.color}")
+
+
+class LawnGrass(Product):
+    """
+    Класс для представления травы газонной.
+    Наследуется от класса Product.
+    """
+
+    def __init__(self, name: str, description: str, price: float, quantity: int,
+                 country: str, germination_period: int, color: str):
+        """
+        Инициализация травы газонной.
+
+        Args:
+            name (str): Название травы
+            description (str): Описание травы
+            price (float): Цена травы
+            quantity (int): Количество на складе
+            country (str): Страна-производитель
+            germination_period (int): Срок прорастания (дни)
+            color (str): Цвет травы
+        """
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self):
+        """Строковое представление травы газонной."""
+        return (f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
+                f"Страна: {self.country}, Прорастание: {self.germination_period} дней")
 
 
 class Category:
@@ -103,8 +167,14 @@ class Category:
         Добавляет товар в категорию.
 
         Args:
-            product (Product): Объект товара для добавления
+            product: Объект товара для добавления
+
+        Raises:
+            TypeError: Если переданный объект не является продуктом или его наследником
         """
+        if not isinstance(product, Product):
+            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+
         self.__products.append(product)
         Category.product_count += 1
 

@@ -1,10 +1,11 @@
-from src.models import Product, Category
+from src.models import Product, Category, Smartphone, LawnGrass
 
 if __name__ == "__main__":
     # Сброс счетчиков
     Category.category_count = 0
     Category.product_count = 0
 
+    # Создание обычных продуктов (старая функциональность)
     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
     product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
@@ -34,25 +35,81 @@ if __name__ == "__main__":
     print(category1.category_count)
     print(category1.product_count)
 
-    # Демонстрация новой функциональности - строковое представление
-    print("\nСтроковое представление продуктов:")
-    print(product1)
-    print(product2)
-    print(product3)
+    # Новая функциональность - создание смартфонов
+    smartphone1 = Smartphone("iPhone 15 Pro", "Флагманский смартфон", 120000.0, 10,
+                             efficiency=4.5, model="15 Pro", memory=256, color="Титановый")
 
-    print("\nСтроковое представление категории:")
-    print(category1)
+    smartphone2 = Smartphone("Samsung Galaxy S24", "Ультрасовременный смартфон", 90000.0, 15,
+                             efficiency=4.8, model="S24 Ultra", memory=512, color="Черный")
 
-    print("\nСложение продуктов (общая стоимость):")
-    total_cost = product1 + product2
-    print(f"Сумма стоимости {product1.name} и {product2.name}: {total_cost} руб.")
+    print("\nСмартфоны (новые классы):")
+    print(smartphone1)
+    print(smartphone2)
 
-    print("\nТовары в категории (через геттер):")
-    print(category1.products)
+    # Новая функциональность - создание травы газонной
+    grass1 = LawnGrass("Газонная трава Премиум", "Высококачественная газонная трава", 2500.0, 50,
+                       country="Германия", germination_period=14, color="Ярко-зеленый")
 
-    print("\nИтерация по товарам категории:")
-    for product in category1:
-        print(product)
+    grass2 = LawnGrass("Спортивный газон", "Трава для спортивных площадок", 1800.0, 30,
+                       country="Нидерланды", germination_period=10, color="Темно-зеленый")
+
+    print("\nТрава газонная (новые классы):")
+    print(grass1)
+    print(grass2)
+
+    # Демонстрация сложения товаров одного типа
+    print("\nСложение смартфонов:")
+    try:
+        smartphone_total = smartphone1 + smartphone2
+        print(f"Общая стоимость смартфонов: {smartphone_total} руб.")
+    except TypeError as e:
+        print(f"Ошибка: {e}")
+
+    print("\nСложение травы газонной:")
+    try:
+        grass_total = grass1 + grass2
+        print(f"Общая стоимость травы: {grass_total} руб.")
+    except TypeError as e:
+        print(f"Ошибка: {e}")
+
+    # Демонстрация ошибки при сложении разных типов
+    print("\nПопытка сложить смартфон и траву:")
+    try:
+        invalid_total = smartphone1 + grass1
+        print(f"Результат: {invalid_total} руб.")
+    except TypeError as e:
+        print(f"Ошибка: {e}")
+
+    # Создание категорий с новыми товарами
+    smartphones_category = Category("Смартфоны", "Мобильные устройства", [smartphone1, smartphone2])
+    grass_category = Category("Газонная трава", "Садовые товары", [grass1, grass2])
+
+    print(f"\nКатегория смартфонов: {smartphones_category}")
+    print("Товары в категории смартфонов:")
+    for product in smartphones_category:
+        print(f"  - {product}")
+
+    print(f"\nКатегория травы: {grass_category}")
+    print("Товары в категории травы:")
+    for product in grass_category:
+        print(f"  - {product}")
+
+    # Демонстрация защиты метода add_product
+    print("\nПопытка добавить не-продукт в категорию:")
+    try:
+        smartphones_category.add_product("не продукт")
+    except TypeError as e:
+        print(f"Ошибка: {e}")
+
+    # Корректное добавление продукта
+    print("\nКорректное добавление продукта:")
+    smartphone3 = Smartphone("Google Pixel 8", "Смартфон с AI", 75000.0, 8,
+                             efficiency=4.2, model="Pixel 8", memory=128, color="Белый")
+    smartphones_category.add_product(smartphone3)
+    print(f"После добавления: {smartphones_category}")
+    print("Товары в категории:")
+    for product in smartphones_category:
+        print(f"  - {product}")
 
     product4 = Product("55\" QLED 4K", "Фоновая подсветка", 123000.0, 7)
     category2 = Category("Телевизоры",
@@ -64,12 +121,6 @@ if __name__ == "__main__":
     print(len(category2.products_list))
     print(category2.products)
 
-    print(Category.category_count)
-    print(Category.product_count)
-
-    # Демонстрация для второй категории
-    print("\nВторая категория:")
-    print(category2)
-    print("Товары во второй категории:")
-    for product in category2:
-        print(product)
+    print(f"\nОбщая статистика:")
+    print(f"Всего категорий: {Category.category_count}")
+    print(f"Всего товаров: {Category.product_count}")
