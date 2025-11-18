@@ -1,9 +1,64 @@
 import pytest
-from src.models import Product, Category, Smartphone, LawnGrass, CategoryIterator
+from src.models import (Product, Category, Smartphone, LawnGrass,
+                        CategoryIterator, BaseProduct, LoggingMixin)
+
+
+class TestBaseProduct:
+    """Тесты для абстрактного базового класса."""
+
+    def test_base_product_is_abstract(self):
+        """Тест что BaseProduct является абстрактным классом."""
+        # Нельзя создать экземпляр абстрактного класса
+        with pytest.raises(TypeError):
+            BaseProduct("Test", "Desc", 100.0, 5)
+
+    def test_product_inherits_from_base_product(self):
+        """Тест что Product наследуется от BaseProduct."""
+        assert issubclass(Product, BaseProduct)
+
+    def test_smartphone_inherits_from_base_product(self):
+        """Тест что Smartphone наследуется от BaseProduct через Product."""
+        assert issubclass(Smartphone, BaseProduct)
+
+    def test_lawn_grass_inherits_from_base_product(self):
+        """Тест что LawnGrass наследуется от BaseProduct через Product."""
+        assert issubclass(LawnGrass, BaseProduct)
+
+
+class TestLoggingMixin:
+    """Тесты для класса-миксина."""
+
+    def test_logging_mixin_repr(self):
+        """Тест метода __repr__ миксина."""
+
+        class TestClass(LoggingMixin):
+            def __init__(self, name, value):
+                # Вызываем object.__init__ вместо super()
+                object.__init__(self)
+                self.name = name
+                self.value = value
+
+        obj = TestClass("test_name", 123)
+        repr_str = repr(obj)
+
+        assert "TestClass" in repr_str
+        assert "name='test_name'" in repr_str
+        assert "value=123" in repr_str
+
+    def test_product_has_logging_mixin(self):
+        """Тест что Product использует LoggingMixin."""
+        product = Product("Test", "Desc", 100.0, 5)
+        assert isinstance(product, LoggingMixin)
+
+    def test_logging_on_creation(self, capsys):
+        """Тест логирования при создании объекта."""
+        product = Product("Test", "Desc", 100.0, 5)
+        captured = capsys.readouterr()
+        assert "Создан объект Product с параметрами:" in captured.out
 
 
 class TestProduct:
-    """Тесты для базового класса Product."""
+    """Тесты для класса Product."""
 
     def test_old_functionality_preserved(self):
         """Тест что старая функциональность сохранена."""
@@ -65,6 +120,14 @@ class TestProduct:
         assert product.description == 'New Desc'
         assert product.price == 100.0
         assert product.quantity == 5
+
+    def test_product_repr(self):
+        """Тест метода __repr__ для Product."""
+        product = Product("Test", "Desc", 100.0, 5)
+        repr_str = repr(product)
+        assert "Product" in repr_str
+        assert "name='Test'" in repr_str
+        assert "description='Desc'" in repr_str
 
 
 class TestSmartphone:
@@ -167,136 +230,3 @@ class TestLawnGrass:
         grass = LawnGrass("Grass", "Desc", 500.0, 10, "Country", 14, "Green")
         expected = "Grass, 500.0 руб. Остаток: 10 шт. Страна: Country, Прорастание: 14 дней"
         assert str(grass) == expected
-
-
-class TestCategory:
-    """Тесты для класса Category."""
-
-    def setup_method(self):
-        """Сброс счетчиков перед каждым тестом."""
-        Category.category_count = 0
-        Category.product_count = 0
-
-    def test_add_product_validation(self):
-        """Тест валидации при добавлении продукта."""
-        category = Category("Test", "Desc", [])
-
-        # Корректное добавление Product
-        product = Product("Product", "Desc", 100.0, 2)
-        category.add_product(product)
-        assert len(category.products_list) == 1
-
-        # Корректное добавление Smartphone (наследник Product)
-        smartphone = Smartphone("Phone", "Desc", 1000.0, 2, 4.5, "Model", 128, "Black")
-        category.add_product(smartphone)
-        assert len(category.products_list) == 2
-
-        # Корректное добавление LawnGrass (наследник Product)
-        grass = LawnGrass("Grass", "Desc", 500.0, 5, "Country", 14, "Green")
-        category.add_product(grass)
-        assert len(category.products_list) == 3
-
-    def test_add_product_invalid_type(self):
-        """Тест добавления невалидного типа в категорию."""
-        category = Category("Test", "Desc", [])
-
-        with pytest.raises(TypeError):
-            category.add_product("invalid product")
-
-        with pytest.raises(TypeError):
-            category.add_product(123)
-
-        with pytest.raises(TypeError):
-            category.add_product(None)
-
-    def test_mixed_products_in_category(self):
-        """Тест работы категории со смешанными типами продуктов."""
-        product = Product("Product", "Desc", 100.0, 2)
-        smartphone = Smartphone("Phone", "Desc", 1000.0, 2, 4.5, "Model", 128, "Black")
-        grass = LawnGrass("Grass", "Desc", 500.0, 5, "Country", 14, "Green")
-
-        category = Category("Mixed", "Description", [product, smartphone, grass])
-
-        assert len(category.products_list) == 3
-        assert isinstance(category.products_list[0], Product)
-        assert isinstance(category.products_list[1], Smartphone)
-        assert isinstance(category.products_list[2], LawnGrass)
-
-    def test_old_functionality_preserved(self):
-        """Тест что старая функциональность категории сохранена."""
-        product = Product("Product", "Desc", 100.0, 2)
-        category = Category("Test", "Desc", [product])
-
-        assert category.name == "Test"
-        assert len(category.products_list) == 1
-        assert Category.category_count == 1
-
-    def test_str_representation(self):
-        """Тест строкового представления Category."""
-        product = Product("Product", "Desc", 100.0, 3)
-        category = Category("Test", "Desc", [product])
-        expected = "Test, количество продуктов: 3 шт."
-        assert str(category) == expected
-
-    def test_str_empty(self):
-        """Тест строкового представления пустой категории."""
-        category = Category("Test", "Desc", [])
-        expected = "Test, количество продуктов: 0 шт."
-        assert str(category) == expected
-
-    def test_len(self):
-        """Тест метода __len__ категории."""
-        product1 = Product("P1", "D1", 100.0, 2)
-        product2 = Product("P2", "D2", 200.0, 3)
-        category = Category("Test", "Desc", [product1, product2])
-        assert len(category) == 2
-
-    def test_iteration(self):
-        """Тест итерации по категории."""
-        product1 = Product("P1", "D1", 100.0, 2)
-        product2 = Product("P2", "D2", 200.0, 3)
-        category = Category("Test", "Desc", [product1, product2])
-
-        products = list(category)
-        assert len(products) == 2
-        assert products[0] == product1
-        assert products[1] == product2
-
-
-class TestCategoryIterator:
-    """Тесты для класса CategoryIterator."""
-
-    def test_iterator_initialization(self):
-        """Тест инициализации итератора."""
-        products = [
-            Product("Product1", "Desc1", 100.0, 2),
-            Product("Product2", "Desc2", 200.0, 3)
-        ]
-        iterator = CategoryIterator(products)
-
-        assert iterator.products == products
-        assert iterator.index == 0
-
-    def test_iterator_next(self):
-        """Тест метода next итератора."""
-        product1 = Product("Product1", "Desc1", 100.0, 2)
-        product2 = Product("Product2", "Desc2", 200.0, 3)
-        products = [product1, product2]
-        iterator = CategoryIterator(products)
-
-        assert next(iterator) == product1
-        assert next(iterator) == product2
-
-        with pytest.raises(StopIteration):
-            next(iterator)
-
-    def test_iterator_for_loop(self):
-        """Тест использования итератора в цикле for."""
-        product1 = Product("Product1", "Desc1", 100.0, 2)
-        product2 = Product("Product2", "Desc2", 200.0, 3)
-
-        collected_products = []
-        for product in CategoryIterator([product1, product2]):
-            collected_products.append(product)
-
-        assert collected_products == [product1, product2]

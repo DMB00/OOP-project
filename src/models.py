@@ -1,5 +1,60 @@
-class Product:
-    """Базовый класс для представления товара."""
+from abc import ABC, abstractmethod
+
+
+class LoggingMixin:
+    """Миксин для логирования создания объектов."""
+
+    def __init__(self, *args, **kwargs):
+        """Инициализация с логированием параметров."""
+        super().__init__(*args, **kwargs)
+        class_name = self.__class__.__name__
+        print(f"Создан объект {class_name} с параметрами: {args}")
+
+    def __repr__(self):
+        """Представление объекта для отладки."""
+        attributes = []
+        for attr, value in self.__dict__.items():
+            if not attr.startswith('_'):
+                attributes.append(f"{attr}='{value}'" if isinstance(value, str) else f"{attr}={value}")
+        return f"{self.__class__.__name__}({', '.join(attributes)})"
+
+
+class BaseProduct(ABC):
+    """Абстрактный базовый класс для товаров."""
+
+    @abstractmethod
+    def __init__(self, name: str, description: str, price: float, quantity: int):
+        """Абстрактный метод инициализации продукта."""
+        self.name = name
+        self.description = description
+        self._price = price
+        self.quantity = quantity
+
+    @abstractmethod
+    def __str__(self):
+        """Абстрактный метод строкового представления."""
+        pass
+
+    @abstractmethod
+    def __add__(self, other):
+        """Абстрактный метод сложения продуктов."""
+        pass
+
+    @property
+    @abstractmethod
+    def price(self):
+        """Абстрактный геттер для цены."""
+        pass
+
+    @price.setter
+    @abstractmethod
+    def price(self, value):
+        """Абстрактный сеттер для цены."""
+        pass
+
+
+class Product(LoggingMixin, BaseProduct):
+    """Класс для представления товара."""
 
     def __init__(self, name: str, description: str, price: float, quantity: int):
         """
@@ -11,10 +66,8 @@ class Product:
             price: Цена товара
             quantity: Количество товара в наличии
         """
-        self.name = name
-        self.description = description
+        super().__init__(name, description, price, quantity)
         self.__price = price
-        self.quantity = quantity
 
     def __str__(self):
         """Строковое представление продукта."""
