@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 
 class LoggingMixin:
@@ -6,7 +7,11 @@ class LoggingMixin:
 
     def __init__(self, *args, **kwargs):
         """Инициализация с логированием параметров."""
-        super().__init__(*args, **kwargs)
+        try:
+            super().__init__(*args, **kwargs)
+        except TypeError:
+            pass
+
         class_name = self.__class__.__name__
         print(f"Создан объект {class_name} с параметрами: {args}")
 
@@ -14,8 +19,10 @@ class LoggingMixin:
         """Представление объекта для отладки."""
         attributes = []
         for attr, value in self.__dict__.items():
-            if not attr.startswith('_'):
-                attributes.append(f"{attr}='{value}'" if isinstance(value, str) else f"{attr}={value}")
+            # Включаем все атрибуты, включая защищенные
+            if not attr.startswith('__'):  # Изменили условие
+                attr_name = attr.lstrip('_')  # Убираем подчеркивания для читаемости
+                attributes.append(f"{attr_name}='{value}'" if isinstance(value, str) else f"{attr_name}={value}")
         return f"{self.__class__.__name__}({', '.join(attributes)})"
 
 
@@ -25,10 +32,10 @@ class BaseProduct(ABC):
     @abstractmethod
     def __init__(self, name: str, description: str, price: float, quantity: int):
         """Абстрактный метод инициализации продукта."""
-        self.name = name
-        self.description = description
+        self._name = name
+        self._description = description
         self._price = price
-        self.quantity = quantity
+        self._quantity = quantity
 
     @abstractmethod
     def __str__(self):
@@ -52,6 +59,21 @@ class BaseProduct(ABC):
         """Абстрактный сеттер для цены."""
         pass
 
+    @property
+    def name(self) -> str:
+        """Геттер для названия."""
+        return self._name
+
+    @property
+    def description(self) -> str:
+        """Геттер для описания."""
+        return self._description
+
+    @property
+    def quantity(self) -> int:
+        """Геттер для количества."""
+        return self._quantity
+
 
 class Product(LoggingMixin, BaseProduct):
     """Класс для представления товара."""
@@ -65,9 +87,19 @@ class Product(LoggingMixin, BaseProduct):
             description: Описание товара
             price: Цена товара
             quantity: Количество товара в наличии
+
+        Raises:
+            ValueError: Если количество равно нулю или отрицательное
         """
-        super().__init__(name, description, price, quantity)
+        # Проверка на нулевое или отрицательное количество
+        if quantity <= 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
+        # Вызов родительских конструкторов
+        BaseProduct.__init__(self, name, description, price, quantity)
+        LoggingMixin.__init__(self)
         self.__price = price
+        self._quantity = quantity
 
     def __str__(self):
         """Строковое представление продукта."""
@@ -216,10 +248,28 @@ class Category:
         """
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только объекты класса Product "
-                          "или его наследников")
+                            "или его наследников")
 
         self.__products.append(product)
         Category.product_count += 1
+
+    def middle_price(self) -> float:
+        """
+        Подсчитывает средний ценник всех товаров в категории.
+
+        Returns:
+            float: Средняя цена товаров или 0 если товаров нет
+        """
+        try:
+            if not self.__products:
+                return 0.0
+
+            total_price = sum(product.price for product in self.__products)
+            average_price = total_price / len(self.__products)
+            return average_price
+
+        except ZeroDivisionError:
+            return 0.0
 
     @property
     def products(self):

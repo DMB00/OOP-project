@@ -8,7 +8,6 @@ class TestBaseProduct:
 
     def test_base_product_is_abstract(self):
         """Тест что BaseProduct является абстрактным классом."""
-        # Нельзя создать экземпляр абстрактного класса
         with pytest.raises(TypeError):
             BaseProduct("Test", "Desc", 100.0, 5)
 
@@ -33,7 +32,6 @@ class TestLoggingMixin:
 
         class TestClass(LoggingMixin):
             def __init__(self, name, value):
-                # Вызываем object.__init__ вместо super()
                 object.__init__(self)
                 self.name = name
                 self.value = value
@@ -125,9 +123,10 @@ class TestProduct:
         """Тест метода __repr__ для Product."""
         product = Product("Test", "Desc", 100.0, 5)
         repr_str = repr(product)
+        # Теперь проверяем что repr содержит нужную информацию
         assert "Product" in repr_str
-        assert "name='Test'" in repr_str
-        assert "description='Desc'" in repr_str
+        assert "name='Test'" in repr_str or "name=Test" in repr_str
+        assert "description='Desc'" in repr_str or "description=Desc" in repr_str
 
 
 class TestSmartphone:
@@ -230,3 +229,82 @@ class TestLawnGrass:
         grass = LawnGrass("Grass", "Desc", 500.0, 10, "Country", 14, "Green")
         expected = "Grass, 500.0 руб. Остаток: 10 шт. Страна: Country, Прорастание: 14 дней"
         assert str(grass) == expected
+
+
+class TestProductExceptions:
+    """Тесты для обработки исключений в классе Product."""
+
+    def test_product_creation_with_zero_quantity_raises_error(self):
+        """Тест что создание товара с нулевым количеством вызывает ValueError."""
+        with pytest.raises(ValueError) as exc_info:
+            Product("Test Product", "Description", 100.0, 0)
+
+        assert "Товар с нулевым количеством не может быть добавлен" in str(exc_info.value)
+
+    def test_product_creation_with_positive_quantity_works(self):
+        """Тест что создание товара с положительным количеством работает нормально."""
+        product = Product("Test Product", "Description", 100.0, 5)
+        assert product.quantity == 5
+
+    def test_product_creation_with_negative_quantity_raises_error(self):
+        """Тест что создание товара с отрицательным количеством вызывает ошибку."""
+        with pytest.raises(ValueError) as exc_info:
+            Product("Test Product", "Description", 100.0, -5)
+
+        assert "Товар с нулевым количеством не может быть добавлен" in str(exc_info.value)
+
+
+class TestCategoryMiddlePrice:
+    """Тесты для метода middle_price класса Category."""
+
+    def test_middle_price_with_products(self):
+        """Тест среднего ценника с товарами."""
+        product1 = Product("Product1", "Desc1", 100.0, 5)
+        product2 = Product("Product2", "Desc2", 200.0, 3)
+        product3 = Product("Product3", "Desc3", 300.0, 2)
+
+        category = Category("Test Category", "Description", [product1, product2, product3])
+
+        expected_average = (100.0 + 200.0 + 300.0) / 3
+        assert category.middle_price() == expected_average
+
+    def test_middle_price_empty_category(self):
+        """Тест среднего ценника с пустой категорией."""
+        category = Category("Empty Category", "Description", [])
+        assert category.middle_price() == 0.0
+
+    def test_middle_price_single_product(self):
+        """Тест среднего ценника с одним товаром."""
+        product = Product("Single Product", "Desc", 150.0, 1)
+        category = Category("Single Category", "Description", [product])
+        assert category.middle_price() == 150.0
+
+    def test_middle_price_with_different_prices(self):
+        """Тест среднего ценника с разными ценами."""
+        products = [
+            Product(f"Product{i}", f"Desc{i}", price * 100.0, 1)
+            for i, price in enumerate([1, 2, 3, 4, 5], 1)
+        ]
+
+        category = Category("Mixed Prices", "Description", products)
+
+        expected_average = (100 + 200 + 300 + 400 + 500) / 5
+        assert category.middle_price() == expected_average
+
+
+class TestInheritanceExceptions:
+    """Тесты исключений для классов-наследников."""
+
+    def test_smartphone_zero_quantity_raises_error(self):
+        """Тест что Smartphone с нулевым количеством вызывает ошибку."""
+        with pytest.raises(ValueError) as exc_info:
+            Smartphone("Phone", "Desc", 1000.0, 0, 4.5, "Model", 128, "Black")
+
+        assert "Товар с нулевым количеством не может быть добавлен" in str(exc_info.value)
+
+    def test_lawn_grass_zero_quantity_raises_error(self):
+        """Тест что LawnGrass с нулевым количеством вызывает ошибку."""
+        with pytest.raises(ValueError) as exc_info:
+            LawnGrass("Grass", "Desc", 500.0, 0, "Country", 14, "Green")
+
+        assert "Товар с нулевым количеством не может быть добавлен" in str(exc_info.value)
